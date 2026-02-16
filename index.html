@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GardenMatch v1.0 - Smart Plant Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forest-deep: #1a3a2e;
+            --sage-deep: #4a6b5e;
+            --sage-mid: #7fa693;
+            --sage-light: #a8c5b8;
+            --mint-whisper: #d4e8df;
+            --cream: #faf8f3;
+            --warm-white: #ffffff;
+            --olive: #8b956d;
+            --eucalyptus: #b5c99a;
+            --moss: #97a97c;
+            --terracotta: #c57b57;
+            --sunset: #e8a87c;
+            --shadow: rgba(26, 58, 46, 0.08);
+            --shadow-soft: rgba(127, 166, 147, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #faf8f3 0%, #f0ede5 50%, #e8e4d9 100%);
+            color: var(--forest-deep);
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(181, 201, 154, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 197, 184, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--forest-deep) 0%, var(--sage-deep) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--sage-deep);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        .leaf-decoration {
+            display: inline-block;
+            font-size: 2rem;
+            margin: 0 1rem;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px var(--shadow));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 1px 3px var(--shadow),
+                0 10px 40px var(--shadow-soft),
+                0 0 0 1px rgba(127, 166, 147, 0.1);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+            border: 1px solid rgba(168, 197, 184, 0.2);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.4rem;
+            color: var(--forest-deep);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 1px 2px var(--shadow));
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--sage-deep);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--mint-whisper);
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--warm-white);
+            color: var(--forest-deep);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--sage-mid);
+            background: var(--warm-white);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 4px 12px var(--shadow-soft),
+                0 0 0 3px rgba(127, 166, 147, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            background: linear-gradient(135deg, var(--mint-whisper) 0%, rgba(212, 232, 223, 0.5) 100%);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(168, 197, 184, 0.3);
+        }
+
+        .checkbox-item:hover {
+            background: linear-gradient(135deg, var(--sage-light) 0%, var(--mint-whisper) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-soft);
+            border-color: var(--sage-mid);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.7rem;
+            cursor: pointer;
+            accent-color: var(--sage-mid);
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--sage-mid) 0%, var(--sage-deep) 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DM Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            box-shadow: 
+                0 4px 15px rgba(127, 166, 147, 0.3),
+                0 1px 3px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 6px 25px rgba(127, 166, 147, 0.4),
+                0 2px 8px var(--shadow);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .results-section {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .results-header {
+            background: linear-gradient(135deg, var(--sage-mid) 0%, var(--eucalyptus) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 24px 24px 0 0;
+            text-align: center;
+            box-shadow: 0 -2px 20px rgba(127, 166, 147, 0.2);
+        }
+
+        .results-header h2 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(26, 58, 46, 0.2);
+        }
+
+        .results-info {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .plants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 24px 24px;
+            box-shadow: 
+                0 10px 40px var(--shadow-soft),
+                0 0 0 1px rgba(168, 197, 184, 0.1);
+        }
+
+        .plant-card {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            border-radius: 18px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--mint-whisper);
+            animation: plantFadeIn 0.5s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plant-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--sage-mid), var(--eucalyptus), var(--moss));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .plant-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .plant-card:nth-child(1) { animation-delay: 0.1s; }
+        .plant-card:nth-child(2) { animation-delay: 0.2s; }
+        .plant-card:nth-child(3) { animation-delay: 0.3s; }
+        .plant-card:nth-child(4) { animation-delay: 0.4s; }
+        .plant-card:nth-child(5) { animation-delay: 0.5s; }
+        .plant-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes plantFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .plant-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 12px 30px rgba(127, 166, 147, 0.25),
+                0 4px 12px var(--shadow);
+            border-color: var(--sage-mid);
+        }
+
+        .plant-name {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--forest-deep) 0%, var(--sage-deep) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+
+        .plant-scientific {
+            font-style: italic;
+            color: var(--sage-mid);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .plant-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--mint-whisper) 0%, rgba(212, 232, 223, 0.7) 100%);
+            color: var(--sage-deep);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(168, 197, 184, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: linear-gradient(135deg, var(--sage-light) 0%, var(--mint-whisper) 100%);
+            transform: translateY(-1px);
+        }
+
+        .plant-description {
+            color: var(--forest-deep);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .plant-details {
+            border-top: 1px solid var(--mint-whisper);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: var(--sage-mid);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--forest-deep);
+            font-weight: 400;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: var(--sage-deep);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--mint-whisper);
+            border-top-color: var(--sage-mid);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffd4d4 100%);
+            border: 2px solid #ffb3b3;
+            color: #c92a2a;
+            padding: 1.5rem;
+            border-radius: 14px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(212, 232, 223, 0.4) 0%, rgba(168, 197, 184, 0.3) 100%);
+            border-left: 4px solid var(--sage-mid);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-box a {
+            color: var(--sage-deep);
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .info-box a:hover {
+            color: var(--forest-deep);
+        }
+
+        .manual-override {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(168, 197, 184, 0.1);
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .plants-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="leaf-decoration">🌿</span>
+                GardenMatch
+                <span class="leaf-decoration">🌱</span>
+            </h1>
+            <p class="subtitle">Find the perfect plants for your garden's unique conditions</p>
+            <div style="margin-top: 0.5rem;">
+                <span style="display: inline-block; background: linear-gradient(135deg, var(--sage-mid) 0%, var(--eucalyptus) 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px var(--shadow-soft);">
+                    Version 1.0
+                </span>
+            </div>
+        </header>
+
+        <div class="form-card">
+            <div class="info-box">
+                <strong>🔬 How it works:</strong> Enter your address and the app will automatically detect your climate zone and soil type. 
+                Location detection works offline using Australian suburb patterns, and can be enhanced with live APIs when deployed online.
+                Plant recommendations are based on <a href="https://www.inaturalist.org/" target="_blank" style="color: var(--earth-dark); text-decoration: underline;">iNaturalist</a>,
+                <a href="https://www.ala.org.au/" target="_blank" style="color: var(--earth-dark); text-decoration: underline;">Atlas of Living Australia</a>, and Australian botanical databases.
+            </div>
+            
+            <form id="gardenForm">
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">📍</span>
+                        Location
+                    </h2>
+                    <div class="input-group">
+                        <div>
+                            <label for="address">Garden Address</label>
+                            <input type="text" id="address" placeholder="e.g., 123 Main Street, Sydney NSW 2000" required>
+                        </div>
+                    </div>
+                    <div class="info-box" id="locationInfo" style="display: none;">
+                        <strong>Detected:</strong> <span id="detectedInfo"></span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">☀️</span>
+                        Sun Conditions
+                    </h2>
+                    <div class="input-group">
+                        <div>
+                            <label for="sunCondition">Amount of Sunlight</label>
+                            <select id="sunCondition" required>
+                                <option value="">Select sun condition...</option>
+                                <option value="full-sun">Full Sun (6+ hours direct sun)</option>
+                                <option value="partial-sun">Partial Sun (4-6 hours)</option>
+                                <option value="partial-shade">Partial Shade (2-4 hours)</option>
+                                <option value="full-shade">Full Shade (< 2 hours)</option>
+                                <option value="dappled">Dappled Shade</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">🌍</span>
+                        Soil Type
+                    </h2>
+                    <div id="soilAutoDetected" style="display: none;">
+                        <div class="info-box">
+                            <strong>Auto-detected from location:</strong> <span id="detectedSoil"></span>
+                        </div>
+                        <button type="button" id="manualSoilBtn" style="background: var(--terracotta); padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+                            Edit Soil Type Manually
+                        </button>
+                    </div>
+                    <div id="soilManualInput">
+                        <div class="input-group">
+                            <div>
+                                <label for="soilType">Soil Type (Optional - auto-detected if you enter address above)</label>
+                                <select id="soilType">
+                                    <option value="">Select soil type...</option>
+                                    <option value="clay">Clay (Heavy, drains slowly)</option>
+                                    <option value="sandy">Sandy (Light, drains quickly)</option>
+                                    <option value="loam">Loam (Balanced, ideal)</option>
+                                    <option value="silt">Silt (Smooth, retains moisture)</option>
+                                    <option value="chalky">Chalky (Alkaline, stony)</option>
+                                    <option value="peaty">Peaty (Acidic, high organic)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">🌳</span>
+                        Plant Types
+                    </h2>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="largeTrees" name="plantType" value="large-tree">
+                            <label for="largeTrees">Large Trees</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="smallTrees" name="plantType" value="small-tree">
+                            <label for="smallTrees">Small Trees</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="shrubs" name="plantType" value="shrub">
+                            <label for="shrubs">Shrubs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="groundcover" name="plantType" value="groundcover">
+                            <label for="groundcover">Groundcovers</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="perennials" name="plantType" value="perennial">
+                            <label for="perennials">Perennials</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="grasses" name="plantType" value="grass">
+                            <label for="grasses">Grasses</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="climbers" name="plantType" value="climber">
+                            <label for="climbers">Climbers & Vines</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="succulents" name="plantType" value="succulent">
+                            <label for="succulents">Succulents</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">💧</span>
+                        Additional Preferences
+                    </h2>
+                    <div class="input-group">
+                        <div>
+                            <label for="waterUse">Water Requirements</label>
+                            <select id="waterUse">
+                                <option value="">Any</option>
+                                <option value="Low">Low (Drought tolerant)</option>
+                                <option value="Low to Medium">Low to Medium</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Medium to High">Medium to High</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="frostTolerance">Frost Tolerance</label>
+                            <select id="frostTolerance">
+                                <option value="">Any</option>
+                                <option value="Sensitive">Sensitive (Protect from frost)</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="Hardy">Hardy (Frost tolerant)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="checkbox-group" style="margin-top: 1rem;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="birdAttracting" name="feature" value="Bird attracting">
+                            <label for="birdAttracting">Bird Attracting</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="coastal" name="feature" value="Coastal">
+                            <label for="coastal">Coastal/Salt Tolerant</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="droughtTolerant" name="feature" value="Drought tolerant">
+                            <label for="droughtTolerant">Drought Tolerant</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fireRetardant" name="feature" value="Fire retardant">
+                            <label for="fireRetardant">Fire Retardant</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="screening" name="feature" value="Screening">
+                            <label for="screening">Good for Screening</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="flowering" name="feature" value="Flowering">
+                            <label for="flowering">Showy Flowers</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" style="border-top: 2px solid var(--mint-whisper); padding-top: 2rem; margin-top: 2rem;">
+                    <h2 class="section-title">
+                        <span class="section-icon">📐</span>
+                        Garden Space Planner (Optional)
+                    </h2>
+                    <p style="color: var(--sage-deep); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Want to know how many plants you need? Tell us about your planting area and we'll create a customized plant list with quantities.
+                    </p>
+                    
+                    <div class="checkbox-item" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--eucalyptus) 0%, var(--sage-light) 100%); border-color: var(--sage-mid);">
+                        <input type="checkbox" id="enablePlanner" name="enablePlanner">
+                        <label for="enablePlanner" style="font-weight: 600;">Enable Garden Space Planner</label>
+                    </div>
+
+                    <div id="plannerSection" style="display: none;">
+                        <div class="input-group">
+                            <div>
+                                <label for="spaceShape">Space Shape</label>
+                                <select id="spaceShape">
+                                    <option value="rectangle">Rectangle</option>
+                                    <option value="square">Square</option>
+                                    <option value="l-shape">L-Shape</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="circle">Circle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="rectangleInputs" class="shape-inputs">
+                            <div class="input-group">
+                                <div>
+                                    <label for="length">Length (metres)</label>
+                                    <input type="number" id="length" placeholder="e.g., 5" min="0.1" step="0.1">
+                                </div>
+                                <div>
+                                    <label for="width">Width (metres)</label>
+                                    <input type="number" id="width" placeholder="e.g., 3" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="squareInputs" class="shape-inputs" style="display: none;">
+                            <div class="input-group">
+                                <div>
+                                    <label for="side">Side Length (metres)</label>
+                                    <input type="number" id="side" placeholder="e.g., 4" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="lshapeInputs" class="shape-inputs" style="display: none;">
+                            <div class="input-group">
+                                <div>
+                                    <label for="lLength1">Main Length (metres)</label>
+                                    <input type="number" id="lLength1" placeholder="e.g., 6" min="0.1" step="0.1">
+                                </div>
+                                <div>
+                                    <label for="lWidth1">Main Width (metres)</label>
+                                    <input type="number" id="lWidth1" placeholder="e.g., 4" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <div>
+                                    <label for="lLength2">Extension Length (metres)</label>
+                                    <input type="number" id="lLength2" placeholder="e.g., 3" min="0.1" step="0.1">
+                                </div>
+                                <div>
+                                    <label for="lWidth2">Extension Width (metres)</label>
+                                    <input type="number" id="lWidth2" placeholder="e.g., 2" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="triangleInputs" class="shape-inputs" style="display: none;">
+                            <div class="input-group">
+                                <div>
+                                    <label for="base">Base (metres)</label>
+                                    <input type="number" id="base" placeholder="e.g., 5" min="0.1" step="0.1">
+                                </div>
+                                <div>
+                                    <label for="height">Height (metres)</label>
+                                    <input type="number" id="height" placeholder="e.g., 4" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="circleInputs" class="shape-inputs" style="display: none;">
+                            <div class="input-group">
+                                <div>
+                                    <label for="radius">Radius (metres)</label>
+                                    <input type="number" id="radius" placeholder="e.g., 3" min="0.1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box" style="margin-top: 1.5rem;">
+                            <strong>💡 How it works:</strong> The planner uses professional landscape design ratios:
+                            <strong>10% canopy (trees), 50% shrubs, 20% climbers, 20% groundcovers/grasses.</strong>
+                            Calculations consider mature plant size and proper spacing. For example, a 20m² garden with shrubs selected 
+                            would allocate 10m² (50%) to shrubs, with 1.5m spacing = approximately 4-5 shrubs. 
+                            Minimum 3 plants per type for visual impact.
+                        </div>
+
+                        <div id="areaDisplay" style="display: none; margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, var(--mint-whisper) 0%, rgba(212, 232, 223, 0.6) 100%); border-radius: 12px; border: 2px solid var(--sage-light);">
+                            <strong style="color: var(--forest-deep);">Calculated Area:</strong> 
+                            <span id="areaValue" style="font-size: 1.2rem; color: var(--sage-deep); font-weight: 600; margin-left: 0.5rem;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit">
+                        <span>🔍</span>
+                        Find My Plants
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="results" class="results-section hidden">
+            <div class="results-header">
+                <h2>Your Perfect Plant Matches</h2>
+                <p class="results-info" id="resultsInfo"></p>
+            </div>
+            <div class="plants-grid" id="plantsGrid"></div>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="form-card">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Finding the perfect plants for your garden...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('gardenForm');
+        const resultsSection = document.getElementById('results');
+        const plantsGrid = document.getElementById('plantsGrid');
+        const loadingSection = document.getElementById('loading');
+        const addressInput = document.getElementById('address');
+        const locationInfo = document.getElementById('locationInfo');
+        const detectedInfo = document.getElementById('detectedInfo');
+        const soilAutoDetected = document.getElementById('soilAutoDetected');
+        const soilManualInput = document.getElementById('soilManualInput');
+        const manualSoilBtn = document.getElementById('manualSoilBtn');
+        const detectedSoil = document.getElementById('detectedSoil');
+        const soilTypeSelect = document.getElementById('soilType');
+
+        // Garden Space Planner Elements
+        const enablePlanner = document.getElementById('enablePlanner');
+        const plannerSection = document.getElementById('plannerSection');
+        const spaceShape = document.getElementById('spaceShape');
+        const areaDisplay = document.getElementById('areaDisplay');
+        const areaValue = document.getElementById('areaValue');
+
+        let autoDetectedData = null;
+        let gardenArea = 0;
+
+        // Toggle planner section
+        enablePlanner.addEventListener('change', function() {
+            if (this.checked) {
+                plannerSection.style.display = 'block';
+                plannerSection.style.animation = 'fadeInUp 0.5s ease-out';
+            } else {
+                plannerSection.style.display = 'none';
+                areaDisplay.style.display = 'none';
+                gardenArea = 0;
+            }
+        });
+
+        // Handle shape selection
+        spaceShape.addEventListener('change', function() {
+            // Hide all shape inputs
+            document.querySelectorAll('.shape-inputs').forEach(input => {
+                input.style.display = 'none';
+            });
+
+            // Show selected shape inputs
+            const selectedShape = this.value;
+            if (selectedShape === 'rectangle') {
+                document.getElementById('rectangleInputs').style.display = 'block';
+            } else if (selectedShape === 'square') {
+                document.getElementById('squareInputs').style.display = 'block';
+            } else if (selectedShape === 'l-shape') {
+                document.getElementById('lshapeInputs').style.display = 'block';
+            } else if (selectedShape === 'triangle') {
+                document.getElementById('triangleInputs').style.display = 'block';
+            } else if (selectedShape === 'circle') {
+                document.getElementById('circleInputs').style.display = 'block';
+            }
+
+            calculateArea();
+        });
+
+        // Add event listeners for all dimension inputs
+        function addDimensionListeners() {
+            const dimensionInputs = [
+                'length', 'width', 'side', 'lLength1', 'lWidth1', 
+                'lLength2', 'lWidth2', 'base', 'height', 'radius'
+            ];
+
+            dimensionInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', calculateArea);
+                }
+            });
+        }
+
+        addDimensionListeners();
+
+        // Calculate area based on shape
+        function calculateArea() {
+            const shape = spaceShape.value;
+            let area = 0;
+
+            try {
+                if (shape === 'rectangle') {
+                    const length = parseFloat(document.getElementById('length').value) || 0;
+                    const width = parseFloat(document.getElementById('width').value) || 0;
+                    area = length * width;
+                } else if (shape === 'square') {
+                    const side = parseFloat(document.getElementById('side').value) || 0;
+                    area = side * side;
+                } else if (shape === 'l-shape') {
+                    const l1 = parseFloat(document.getElementById('lLength1').value) || 0;
+                    const w1 = parseFloat(document.getElementById('lWidth1').value) || 0;
+                    const l2 = parseFloat(document.getElementById('lLength2').value) || 0;
+                    const w2 = parseFloat(document.getElementById('lWidth2').value) || 0;
+                    area = (l1 * w1) + (l2 * w2);
+                } else if (shape === 'triangle') {
+                    const base = parseFloat(document.getElementById('base').value) || 0;
+                    const height = parseFloat(document.getElementById('height').value) || 0;
+                    area = (base * height) / 2;
+                } else if (shape === 'circle') {
+                    const radius = parseFloat(document.getElementById('radius').value) || 0;
+                    area = Math.PI * radius * radius;
+                }
+
+                if (area > 0) {
+                    gardenArea = area;
+                    areaValue.textContent = `${area.toFixed(2)} m²`;
+                    areaDisplay.style.display = 'block';
+                } else {
+                    areaDisplay.style.display = 'none';
+                    gardenArea = 0;
+                }
+            } catch (error) {
+                console.error('Error calculating area:', error);
+                areaDisplay.style.display = 'none';
+                gardenArea = 0;
+            }
+        }
+
+        // Location-based auto-detection with geocoding
+        addressInput.addEventListener('blur', async function() {
+            const address = this.value.trim();
+            if (address.length < 5) return;
+
+            try {
+                // Try geocoding first (will work if network is available)
+                const geocodeData = await geocodeAddress(address);
+                
+                if (geocodeData) {
+                    // Fetch soil data from Victorian Government APIs
+                    const soilData = await fetchSoilData(geocodeData.lat, geocodeData.lng);
+                    
+                    autoDetectedData = {
+                        climateZone: geocodeData.climateZone,
+                        region: geocodeData.region,
+                        soilType: soilData.soilType,
+                        latitude: geocodeData.lat,
+                        longitude: geocodeData.lng
+                    };
+                    
+                    detectedInfo.textContent = `Climate Zone ${autoDetectedData.climateZone}, ${autoDetectedData.region}`;
+                    locationInfo.style.display = 'block';
+                    
+                    detectedSoil.textContent = autoDetectedData.soilType;
+                    soilAutoDetected.style.display = 'block';
+                    soilManualInput.style.display = 'none';
+                }
+            } catch (error) {
+                console.log('Using fallback location detection (network geocoding unavailable)');
+                // Fallback to pattern matching - works offline
+                autoDetectedData = detectLocationData(address);
+                
+                if (autoDetectedData) {
+                    detectedInfo.textContent = `Climate Zone ${autoDetectedData.climateZone}, ${autoDetectedData.region}`;
+                    locationInfo.style.display = 'block';
+                    
+                    detectedSoil.textContent = autoDetectedData.soilType;
+                    soilAutoDetected.style.display = 'block';
+                    soilManualInput.style.display = 'none';
+                }
+            }
+        });
+
+        manualSoilBtn.addEventListener('click', function() {
+            soilAutoDetected.style.display = 'none';
+            soilManualInput.style.display = 'block';
+        });
+
+        // Geocode address using a geocoding service
+        async function geocodeAddress(address) {
+            // Note: In production, you would use a proper geocoding API with your API key
+            // This is a placeholder that shows the structure
+            
+            // For now, we'll use OpenStreetMap's Nominatim (free, but rate-limited)
+            // In production, consider using Google Maps Geocoding API or similar
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&countrycodes=au`
+                );
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    return {
+                        lat: parseFloat(result.lat),
+                        lng: parseFloat(result.lon),
+                        climateZone: determineClimateZone(result.lat, result.lon, result.display_name),
+                        region: extractRegion(result.display_name)
+                    };
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                throw error;
+            }
+            return null;
+        }
+
+        // Fetch soil data from Victorian Government APIs
+        async function fetchSoilData(lat, lng) {
+            // This would call the Agriculture Victoria Soils API
+            // Endpoint: https://www.developer.vic.gov.au/api/agriculture-victoria-soils-api
+            // Note: Requires API key and proper authentication in production
+            
+            try {
+                // PRODUCTION CODE (commented out - requires API key):
+                /*
+                const response = await fetch(
+                    `https://api.vic.gov.au/agriculture/soils/v1/location?latitude=${lat}&longitude=${lng}`,
+                    {
+                        headers: {
+                            'Authorization': 'Bearer YOUR_API_KEY',
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                const soilData = await response.json();
+                return {
+                    soilType: soilData.soil_type || 'Unknown',
+                    texture: soilData.texture,
+                    drainage: soilData.drainage,
+                    ph: soilData.ph
+                };
+                */
+                
+                // Fallback to mock data based on coordinates
+                return estimateSoilFromCoordinates(lat, lng);
+            } catch (error) {
+                console.error('Soil data fetch error:', error);
+                return estimateSoilFromCoordinates(lat, lng);
+            }
+        }
+
+        // Estimate soil type based on coordinates (fallback method)
+        function estimateSoilFromCoordinates(lat, lng) {
+            // Victoria soil type approximations based on general geography
+            // In production, this would be replaced by actual API data
+            
+            // Melbourne metro area
+            if (lat >= -38.2 && lat <= -37.5 && lng >= 144.5 && lng <= 145.5) {
+                return { soilType: 'Clay loam with volcanic influence' };
+            }
+            // Gippsland
+            else if (lat >= -38.5 && lat <= -37.5 && lng >= 145.5 && lng <= 148) {
+                return { soilType: 'Red-brown earths and podzolic soils' };
+            }
+            // Western District
+            else if (lat >= -38.5 && lat <= -37 && lng >= 142 && lng <= 144) {
+                return { soilType: 'Volcanic soils (Dermosols)' };
+            }
+            // Mallee
+            else if (lat >= -36 && lat <= -34.5 && lng >= 141 && lng <= 143) {
+                return { soilType: 'Calcareous sandy soils' };
+            }
+            // Central Victoria
+            else {
+                return { soilType: 'Mixed loam with clay subsoil' };
+            }
+        }
+
+        // Determine climate zone based on coordinates and location
+        function determineClimateZone(lat, lng, displayName) {
+            const nameLower = displayName.toLowerCase();
+            
+            // Victorian climate zones roughly by latitude and region
+            if (nameLower.includes('mildura') || nameLower.includes('swan hill')) {
+                return '2-3'; // Hot, dry
+            } else if (nameLower.includes('melbourne') || nameLower.includes('geelong')) {
+                return '4'; // Temperate
+            } else if (nameLower.includes('ballarat') || nameLower.includes('bendigo')) {
+                return '4-5'; // Cool temperate
+            } else if (nameLower.includes('warrnambool') || nameLower.includes('portland')) {
+                return '4'; // Coastal temperate
+            } else if (lat < -37.5) {
+                return '4-5'; // Southern Victoria - cooler
+            } else {
+                return '3-4'; // Northern Victoria - warmer
+            }
+        }
+
+        // Extract region from geocoding display name
+        function extractRegion(displayName) {
+            // Extract the main region/city from the display name
+            const parts = displayName.split(',');
+            if (parts.length >= 2) {
+                return parts[parts.length - 3]?.trim() || parts[0].trim();
+            }
+            return 'Victoria';
+        }
+
+        // Simulated location detection (works offline, no API needed)
+        function detectLocationData(address) {
+            // Enhanced pattern matching for Australian locations
+            const addressLower = address.toLowerCase();
+            
+            let climateZone, region, soilType;
+            
+            // Victoria
+            if (addressLower.includes('melbourne') || addressLower.includes('vic')) {
+                climateZone = '4';
+                region = 'Melbourne, Victoria';
+                soilType = 'Clay loam with volcanic influence';
+            } else if (addressLower.includes('geelong')) {
+                climateZone = '4';
+                region = 'Geelong, Victoria';
+                soilType = 'Volcanic soils (Dermosols)';
+            } else if (addressLower.includes('ballarat')) {
+                climateZone = '4-5';
+                region = 'Ballarat, Victoria';
+                soilType = 'Clay loam';
+            } else if (addressLower.includes('bendigo')) {
+                climateZone = '4-5';
+                region = 'Bendigo, Victoria';
+                soilType = 'Clay with gold-bearing gravels';
+            } else if (addressLower.includes('mildura')) {
+                climateZone = '2-3';
+                region = 'Mildura, Victoria';
+                soilType = 'Calcareous sandy soils';
+            } else if (addressLower.includes('warrnambool')) {
+                climateZone = '4';
+                region = 'Warrnambool, Victoria';
+                soilType = 'Volcanic soils';
+            } else if (addressLower.includes('gippsland')) {
+                climateZone = '4';
+                region = 'Gippsland, Victoria';
+                soilType = 'Red-brown earths and podzolic soils';
+            }
+            // New South Wales
+            else if (addressLower.includes('sydney') || addressLower.includes('nsw')) {
+                climateZone = '3-4';
+                region = 'Sydney, NSW';
+                soilType = 'Sandy loam to clay loam';
+            } else if (addressLower.includes('newcastle')) {
+                climateZone = '3';
+                region = 'Newcastle, NSW';
+                soilType = 'Coastal sandy soils';
+            } else if (addressLower.includes('wollongong')) {
+                climateZone = '3-4';
+                region = 'Wollongong, NSW';
+                soilType = 'Clay loam';
+            } else if (addressLower.includes('canberra') || addressLower.includes('act')) {
+                climateZone = '4-5';
+                region = 'Canberra, ACT';
+                soilType = 'Red-brown clay loam';
+            }
+            // Queensland
+            else if (addressLower.includes('brisbane') || addressLower.includes('qld')) {
+                climateZone = '2-3';
+                region = 'Brisbane, Queensland';
+                soilType = 'Sandy to clay loam';
+            } else if (addressLower.includes('gold coast')) {
+                climateZone = '2';
+                region = 'Gold Coast, Queensland';
+                soilType = 'Sandy coastal soils';
+            } else if (addressLower.includes('cairns')) {
+                climateZone = '1';
+                region = 'Cairns, Queensland';
+                soilType = 'Tropical red soils';
+            }
+            // South Australia
+            else if (addressLower.includes('adelaide') || addressLower.includes('sa')) {
+                climateZone = '4';
+                region = 'Adelaide, SA';
+                soilType = 'Clay loam';
+            }
+            // Western Australia
+            else if (addressLower.includes('perth') || addressLower.includes('wa')) {
+                climateZone = '3';
+                region = 'Perth, WA';
+                soilType = 'Sandy';
+            }
+            // Tasmania
+            else if (addressLower.includes('hobart') || addressLower.includes('tas')) {
+                climateZone = '5';
+                region = 'Hobart, Tasmania';
+                soilType = 'Clay loam';
+            } else if (addressLower.includes('launceston')) {
+                climateZone = '5';
+                region = 'Launceston, Tasmania';
+                soilType = 'Clay loam';
+            }
+            // Default
+            else {
+                climateZone = '3-5';
+                region = 'Australia';
+                soilType = 'Mixed loam';
+            }
+            
+            return { climateZone, region, soilType };
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const address = document.getElementById('address').value;
+            const sunCondition = document.getElementById('sunCondition').value;
+            
+            let soilType;
+            if (soilAutoDetected.style.display === 'none') {
+                soilType = document.getElementById('soilType').value;
+            } else {
+                soilType = autoDetectedData?.soilType || '';
+            }
+            
+            const plantTypes = Array.from(document.querySelectorAll('input[name="plantType"]:checked'))
+                .map(cb => cb.value);
+
+            if (plantTypes.length === 0) {
+                alert('Please select at least one plant type');
+                return;
+            }
+
+            // Get additional preferences
+            const waterUse = document.getElementById('waterUse').value;
+            const frostTolerance = document.getElementById('frostTolerance').value;
+            const desiredFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked'))
+                .map(cb => cb.value);
+
+            // Show loading
+            loadingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+
+            try {
+                // Fetch plant recommendations
+                const plants = await getPlantRecommendations({
+                    address,
+                    sunCondition,
+                    soilType,
+                    plantTypes,
+                    climateZone: autoDetectedData?.climateZone,
+                    waterUse,
+                    frostTolerance,
+                    desiredFeatures
+                });
+
+                displayResults(plants, sunCondition, soilType);
+            } catch (error) {
+                console.error('Error:', error);
+                plantsGrid.innerHTML = '<div class="error">Error loading plant recommendations. Please try again.</div>';
+                resultsSection.classList.remove('hidden');
+            } finally {
+                loadingSection.classList.add('hidden');
+            }
+        });
+
+        async function getPlantRecommendations(criteria) {
+            // PRODUCTION INTEGRATION NOTES:
+            // 
+            // 1. iNaturalist API (FREE, NO AUTH REQUIRED)
+            //    - Get plant photos and real distribution data
+            //    - See where plants actually grow in Victoria
+            //    - API: https://api.inaturalist.org/v1/
+            //
+            // 2. ANGUS STEWART'S PLANT DATABASE (gardeningwithangus.com.au)
+            //    - Could be accessed via web scraping or by contacting team for API access
+            //
+            // 3. VICTORIAN SOIL DATA API
+            //    - Agriculture Victoria Soils API
+            //
+            // 4. DIGITAL TWIN VICTORIA
+            //    - WMS/WFS services for soil type mapping
+            
+            // Simulated delay to mimic API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Get plants from our database
+            let plantDatabase = getPlantsForCriteria(criteria);
+            
+            // Enhance with iNaturalist data (in production)
+            // plantDatabase = await enrichWithiNaturalistData(plantDatabase, criteria);
+            
+            return plantDatabase;
+        }
+
+        // Function to enrich plant data with iNaturalist observations
+        async function enrichWithiNaturalistData(plants, criteria) {
+            // This would be called in production to add:
+            // - Real photos from Victoria
+            // - Observation counts
+            // - Actual distribution data
+            // - Phenology (flowering times)
+            
+            const enrichedPlants = [];
+            
+            for (const plant of plants) {
+                try {
+                    // Search for taxon in iNaturalist
+                    const taxonResponse = await fetch(
+                        `https://api.inaturalist.org/v1/taxa/autocomplete?q=${encodeURIComponent(plant.name)}&rank=species`
+                    );
+                    const taxonData = await taxonResponse.json();
+                    
+                    if (taxonData.results && taxonData.results.length > 0) {
+                        const taxon = taxonData.results[0];
+                        
+                        // Get observations in Victoria
+                        const obsResponse = await fetch(
+                            `https://api.inaturalist.org/v1/observations?taxon_id=${taxon.id}&place_id=7771&per_page=10&order=desc&order_by=created_at`
+                        );
+                        const obsData = await obsResponse.json();
+                        
+                        plant.iNaturalistData = {
+                            taxonId: taxon.id,
+                            photo: taxon.default_photo?.medium_url,
+                            observationCount: obsData.total_results,
+                            recentObservations: obsData.results
+                        };
+                    }
+                } catch (error) {
+                    console.error(`Error fetching iNaturalist data for ${plant.name}:`, error);
+                }
+                
+                enrichedPlants.push(plant);
+            }
+            
+            return enrichedPlants;
+        }
+
+        function getPlantsForCriteria(criteria) {
+            // Comprehensive Australian native plant database
+            // Expanded based on SA Botanic Gardens Plant Selector+ and Canberra Plant Selector
+            const allPlants = [
+                // LARGE TREES - Australian Natives
+                {
+                    name: "Eucalyptus citriodora",
+                    commonName: "Lemon-scented Gum",
+                    type: "large-tree",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Beautiful tall eucalypt with smooth white bark and lemon-scented foliage. Excellent for large gardens and parklands.",
+                    height: "25-35m",
+                    spread: "10-15m",
+                    features: ["Aromatic", "Drought tolerant", "Native", "Bird attracting"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Eucalyptus leucoxylon",
+                    commonName: "Yellow Gum",
+                    type: "large-tree",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Handsome eucalypt with white, grey or yellow bark and cream to red flowers. Very adaptable to various soil types.",
+                    height: "15-30m",
+                    spread: "10-15m",
+                    features: ["Flowering", "Drought tolerant", "Native", "Bird attracting"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Eucalyptus camaldulensis",
+                    commonName: "River Red Gum",
+                    type: "large-tree",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Iconic Australian tree with mottled grey-white bark. Extremely tough and adaptable, tolerates wet and dry conditions.",
+                    height: "20-45m",
+                    spread: "15-30m",
+                    features: ["Iconic", "Extremely hardy", "Native", "Wildlife habitat"],
+                    waterNeeds: "Low to High",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Corymbia maculata",
+                    commonName: "Spotted Gum",
+                    type: "large-tree",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Tall tree with distinctive spotted bark that sheds in patches. Fast-growing and very ornamental.",
+                    height: "25-45m",
+                    spread: "15-20m",
+                    features: ["Ornamental bark", "Fast growing", "Native", "Timber"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+
+                // SMALL TREES - Australian Natives
+                {
+                    name: "Acacia cognata",
+                    commonName: "River Wattle",
+                    type: "small-tree",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Graceful weeping form with narrow dark green leaves. Perfect small garden tree with year-round appeal.",
+                    height: "4-6m",
+                    spread: "3-4m",
+                    features: ["Weeping form", "Low maintenance", "Native", "Screening"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Melaleuca linariifolia",
+                    commonName: "Snow-in-Summer",
+                    type: "small-tree",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Stunning paperbark with masses of white fluffy flowers in summer. Attracts birds and bees.",
+                    height: "6-10m",
+                    spread: "3-5m",
+                    features: ["Flowering", "Bird attracting", "Native", "Paperbark"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Banksia integrifolia",
+                    commonName: "Coast Banksia",
+                    type: "small-tree",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Coastal tree with silvery undersides to leaves and yellow bottlebrush flowers. Very hardy near the coast.",
+                    height: "5-15m",
+                    spread: "4-8m",
+                    features: ["Coastal", "Bird attracting", "Native", "Salt tolerant"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Allocasuarina verticillata",
+                    commonName: "Drooping She-oak",
+                    type: "small-tree",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Graceful tree with pendulous branchlets and attractive cone-like fruits. Excellent windbreak.",
+                    height: "6-10m",
+                    spread: "3-5m",
+                    features: ["Windbreak", "Coastal", "Native", "Nitrogen fixing"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Acacia baileyana",
+                    commonName: "Cootamundra Wattle",
+                    type: "small-tree",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Beautiful wattle with fine blue-grey foliage and masses of golden flowers in winter-spring.",
+                    height: "4-8m",
+                    spread: "4-6m",
+                    features: ["Flowering", "Blue foliage", "Native", "Fast growing"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+
+                // SHRUBS - Australian Natives
+                {
+                    name: "Westringia fruticosa",
+                    commonName: "Coastal Rosemary",
+                    type: "shrub",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Hardy evergreen shrub with grey-green foliage and small white flowers. Excellent for hedging and coastal gardens.",
+                    height: "1-2m",
+                    spread: "1-2m",
+                    features: ["Salt tolerant", "Hedge", "Native", "Low maintenance"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Grevillea 'Robyn Gordon'",
+                    commonName: "Robyn Gordon Grevillea",
+                    type: "shrub",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Popular hybrid with red and yellow spider flowers almost year-round. Brilliant for attracting birds.",
+                    height: "1.5-2m",
+                    spread: "2-3m",
+                    features: ["Bird attracting", "Long flowering", "Native", "Hummingbird plant"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Callistemon viminalis",
+                    commonName: "Weeping Bottlebrush",
+                    type: "shrub",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Graceful arching branches with brilliant red bottlebrush flowers. Versatile and hardy.",
+                    height: "3-5m",
+                    spread: "2-4m",
+                    features: ["Weeping form", "Bird attracting", "Native", "Wetland tolerant"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Correa reflexa",
+                    commonName: "Common Correa",
+                    type: "shrub",
+                    sun: ["partial-sun", "partial-shade", "full-shade"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Attractive shrub with pendulous tubular flowers in red, pink or cream. Flowers in winter, great for shady spots.",
+                    height: "0.5-1.5m",
+                    spread: "1-2m",
+                    features: ["Winter flowering", "Shade tolerant", "Native", "Bird attracting"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Leptospermum petersonii",
+                    commonName: "Lemon-scented Tea Tree",
+                    type: "shrub",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Aromatic shrub with lemon-scented foliage and white flowers. Can be pruned as hedge or screen.",
+                    height: "2-5m",
+                    spread: "2-3m",
+                    features: ["Aromatic", "Screening", "Native", "Essential oils"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Hakea salicifolia",
+                    commonName: "Willow-leaved Hakea",
+                    type: "shrub",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Dense shrub with willow-like leaves and clusters of white flowers. Very hardy and bird attracting.",
+                    height: "3-6m",
+                    spread: "2-4m",
+                    features: ["Bird attracting", "Screening", "Native", "Frost hardy"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+
+                // GROUNDCOVERS - Australian Natives
+                {
+                    name: "Myoporum parvifolium",
+                    commonName: "Creeping Boobialla",
+                    type: "groundcover",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Fast-growing prostrate groundcover with tiny white flowers. Excellent for erosion control and banks.",
+                    height: "0.1-0.3m",
+                    spread: "2-3m",
+                    features: ["Fast growing", "Salt tolerant", "Native", "Erosion control"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Dichondra repens",
+                    commonName: "Kidney Weed",
+                    type: "groundcover",
+                    sun: ["partial-shade", "full-shade", "dappled"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Soft kidney-shaped leaves forming a lush carpet. Great lawn alternative for shady areas.",
+                    height: "0.05-0.1m",
+                    spread: "spreading",
+                    features: ["Lawn alternative", "Shade tolerant", "Native", "Soft texture"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Viola hederacea",
+                    commonName: "Native Violet",
+                    type: "groundcover",
+                    sun: ["partial-shade", "full-shade", "dappled"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Delicate violet and white flowers on kidney-shaped foliage. Perfect for shaded woodland areas.",
+                    height: "0.05-0.15m",
+                    spread: "spreading",
+                    features: ["Flowering", "Shade loving", "Native", "Fragrant flowers"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Grevillea lanigera",
+                    commonName: "Woolly Grevillea",
+                    type: "groundcover",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Spreading groundcover with soft grey-green foliage and pink-red flowers. Excellent bird attractor.",
+                    height: "0.3-0.6m",
+                    spread: "1-3m",
+                    features: ["Bird attracting", "Flowering", "Native", "Rockery plant"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Carpobrotus rossii",
+                    commonName: "Karkalla",
+                    type: "groundcover",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Succulent coastal groundcover with purple-pink flowers. Edible fruit, traditionally used by Aboriginal people.",
+                    height: "0.1-0.2m",
+                    spread: "spreading",
+                    features: ["Coastal", "Edible", "Native", "Salt tolerant"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                },
+
+                // PERENNIALS - Australian Natives
+                {
+                    name: "Anigozanthos flavidus",
+                    commonName: "Tall Kangaroo Paw",
+                    type: "perennial",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Striking tubular flowers in yellow and red on tall stems. Iconic Australian perennial.",
+                    height: "1-2m",
+                    spread: "0.5-1m",
+                    features: ["Bird attracting", "Cut flowers", "Native", "Drought tolerant"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Dianella caerulea",
+                    commonName: "Blue Flax Lily",
+                    type: "perennial",
+                    sun: ["partial-sun", "partial-shade", "dappled"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Strappy foliage with delicate blue flowers followed by bright blue berries. Versatile and hardy.",
+                    height: "0.5-1m",
+                    spread: "0.5-1m",
+                    features: ["Blue berries", "Shade tolerant", "Native", "Bird food"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Chrysocephalum apiculatum",
+                    commonName: "Common Everlasting",
+                    type: "perennial",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Low-growing perennial with grey-green foliage and golden yellow button flowers. Long flowering period.",
+                    height: "0.2-0.4m",
+                    spread: "0.3-0.6m",
+                    features: ["Flowering", "Drought tolerant", "Native", "Cut flowers"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Wahlenbergia stricta",
+                    commonName: "Tall Bluebell",
+                    type: "perennial",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Delicate blue star-shaped flowers on slender stems. Perfect for cottage gardens and naturalistic plantings.",
+                    height: "0.3-0.6m",
+                    spread: "0.2-0.4m",
+                    features: ["Flowering", "Delicate", "Native", "Self-seeds"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Hardy"
+                },
+
+                // GRASSES - Australian Natives
+                {
+                    name: "Lomandra longifolia",
+                    commonName: "Spiny-headed Mat Rush",
+                    type: "grass",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Tough strappy-leafed grass with fragrant cream flowers. Extremely hardy and versatile.",
+                    height: "0.5-1m",
+                    spread: "0.5-1m",
+                    features: ["Drought tolerant", "Fragrant", "Native", "Low maintenance"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Poa labillardieri",
+                    commonName: "Common Tussock Grass",
+                    type: "grass",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Attractive blue-green tussock forming grass. Perfect for mass planting or as feature.",
+                    height: "0.4-0.8m",
+                    spread: "0.4-0.6m",
+                    features: ["Ornamental", "Low maintenance", "Native", "Erosion control"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Themeda triandra",
+                    commonName: "Kangaroo Grass",
+                    type: "grass",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam", "clay"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Important native grassland species with reddish seed heads. Excellent for revegetation and meadows.",
+                    height: "0.3-0.9m",
+                    spread: "0.3-0.6m",
+                    features: ["Grassland", "Revegetation", "Native", "Wildlife habitat"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Microlaena stipoides",
+                    commonName: "Weeping Grass",
+                    type: "grass",
+                    sun: ["partial-sun", "partial-shade", "full-shade"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Graceful native grass for shaded areas. Forms soft tufts with weeping seed heads.",
+                    height: "0.3-0.7m",
+                    spread: "0.3-0.5m",
+                    features: ["Shade tolerant", "Graceful", "Native", "Understorey"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Austrostipa ramosissima",
+                    commonName: "Bamboo Grass",
+                    type: "grass",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Graceful grass with fine foliage and tall, feathery seed heads. Prefers well-drained soil.",
+                    height: "0.6-1.5m",
+                    spread: "0.5-1m",
+                    features: ["Ornamental", "Seeds for birds", "Native", "Feature plant"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+
+                // CLIMBERS - Australian Natives
+                {
+                    name: "Pandorea jasminoides",
+                    commonName: "Bower Vine",
+                    type: "climber",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Vigorous twining climber with masses of pink or white trumpet flowers. Beautiful on fences and pergolas.",
+                    height: "4-6m",
+                    spread: "2-3m",
+                    features: ["Flowering", "Vigorous", "Native", "Screening"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Hardenbergia violacea",
+                    commonName: "Purple Coral Pea",
+                    type: "climber",
+                    sun: ["full-sun", "partial-sun", "partial-shade"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Stunning purple pea flowers in winter-spring. Can be grown as climber or groundcover.",
+                    height: "2-4m",
+                    spread: "2-3m",
+                    features: ["Winter flowering", "Versatile", "Native", "Frost hardy"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Hardy"
+                },
+                {
+                    name: "Kennedia rubicunda",
+                    commonName: "Dusky Coral Pea",
+                    type: "climber",
+                    sun: ["partial-sun", "partial-shade"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4"],
+                    description: "Twining climber with distinctive coral-red pea flowers. Great for shaded positions.",
+                    height: "2-4m",
+                    spread: "1-2m",
+                    features: ["Shade tolerant", "Flowering", "Native", "Coastal"],
+                    waterNeeds: "Low to Medium",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Clematis aristata",
+                    commonName: "Old Man's Beard",
+                    type: "climber",
+                    sun: ["partial-sun", "partial-shade"],
+                    soil: ["loam", "clay"],
+                    climateZones: ["3", "4", "5"],
+                    description: "Native clematis with masses of small white star flowers followed by fluffy seed heads.",
+                    height: "3-6m",
+                    spread: "2-4m",
+                    features: ["Flowering", "Fluffy seeds", "Native", "Forest plant"],
+                    waterNeeds: "Medium",
+                    frostTolerance: "Hardy"
+                },
+
+                // SUCCULENTS - Australian Natives
+                {
+                    name: "Carpobrotus glaucescens",
+                    commonName: "Pigface",
+                    type: "succulent",
+                    sun: ["full-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Succulent groundcover with bright purple-pink flowers. Excellent for coastal and dry gardens.",
+                    height: "0.1-0.2m",
+                    spread: "spreading",
+                    features: ["Salt tolerant", "Drought tolerant", "Native", "Fire retardant"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                },
+                {
+                    name: "Disphyma crassifolium",
+                    commonName: "Rounded Noon-flower",
+                    type: "succulent",
+                    sun: ["full-sun", "partial-sun"],
+                    soil: ["sandy", "loam"],
+                    climateZones: ["2", "3", "4", "5"],
+                    description: "Low succulent with vibrant purple daisy flowers. Perfect for rockeries and coastal planting.",
+                    height: "0.1-0.15m",
+                    spread: "0.5-1m",
+                    features: ["Flowering", "Coastal", "Native", "Rockery"],
+                    waterNeeds: "Low",
+                    frostTolerance: "Moderate"
+                }
+            ];
+
+            // Filter plants based on criteria
+            let filtered = allPlants.filter(plant => {
+                // Must match at least one selected plant type
+                if (!criteria.plantTypes.includes(plant.type)) return false;
+                
+                // Must be suitable for sun condition
+                if (!plant.sun.includes(criteria.sunCondition)) return false;
+                
+                return true;
+            });
+
+            // Apply water use filter if specified
+            if (filtered.length > 0 && criteria.waterUse) {
+                const waterFiltered = filtered.filter(plant => {
+                    return plant.waterNeeds === criteria.waterUse || 
+                           plant.waterNeeds.includes(criteria.waterUse);
+                });
+                if (waterFiltered.length > 0) {
+                    filtered = waterFiltered;
+                }
+            }
+
+            // Apply frost tolerance filter if specified
+            if (filtered.length > 0 && criteria.frostTolerance) {
+                const frostFiltered = filtered.filter(plant => {
+                    return plant.frostTolerance === criteria.frostTolerance;
+                });
+                if (frostFiltered.length > 0) {
+                    filtered = frostFiltered;
+                }
+            }
+
+            // Apply desired features filter if specified
+            if (filtered.length > 0 && criteria.desiredFeatures && criteria.desiredFeatures.length > 0) {
+                const featureFiltered = filtered.filter(plant => {
+                    // Plant must have at least one of the desired features
+                    return criteria.desiredFeatures.some(feature => 
+                        plant.features.some(pf => pf.toLowerCase().includes(feature.toLowerCase()))
+                    );
+                });
+                if (featureFiltered.length > 0) {
+                    filtered = featureFiltered;
+                }
+            }
+
+            // If we have results with sun and type, try to further filter by soil
+            if (filtered.length > 0 && criteria.soilType) {
+                const soilFiltered = filtered.filter(plant => {
+                    const soilMatch = plant.soil.some(s => 
+                        criteria.soilType.toLowerCase().includes(s) || 
+                        s.includes(criteria.soilType.toLowerCase().split(' ')[0])
+                    );
+                    return soilMatch;
+                });
+                
+                // Only use soil filtering if it doesn't eliminate all results
+                if (soilFiltered.length > 0) {
+                    filtered = soilFiltered;
+                }
+            }
+
+            // Try to filter by climate zone if we still have results
+            if (filtered.length > 0 && criteria.climateZone) {
+                const zones = criteria.climateZone.split('-');
+                const zoneFiltered = filtered.filter(plant => {
+                    return zones.some(z => plant.climateZones.includes(z.trim()));
+                });
+                
+                // Only use climate filtering if it doesn't eliminate all results
+                if (zoneFiltered.length > 0) {
+                    filtered = zoneFiltered;
+                }
+            }
+
+            // If we have results, return them; otherwise return a broader set
+            if (filtered.length > 0) {
+                return filtered;
+            } else {
+                // Fallback: just match plant type and show up to 12 plants
+                return allPlants.filter(plant => 
+                    criteria.plantTypes.includes(plant.type)
+                ).slice(0, 12);
+            }
+        }
+
+        function displayResults(plants, sunCondition, soilType) {
+            const resultsInfo = document.getElementById('resultsInfo');
+            
+            // If garden planner is enabled, calculate quantities
+            if (enablePlanner.checked && gardenArea > 0) {
+                const plantList = calculatePlantQuantities(plants, gardenArea);
+                displayPlantListWithQuantities(plantList, sunCondition, soilType);
+            } else {
+                resultsInfo.textContent = `Found ${plants.length} Australian native plants perfect for ${sunCondition.replace('-', ' ')} conditions`;
+                displayPlantCards(plants);
+            }
+
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Calculate how many plants needed based on area and plant types
+        function calculatePlantQuantities(plants, area) {
+            // Professional landscape design percentages (from horticultural guides)
+            // These represent the proportion of total garden area allocated to each layer
+            const layerPercentages = {
+                'large-tree': 0.10,      // 10% - Canopy/trees
+                'small-tree': 0.10,      // 10% - Part of canopy layer
+                'shrub-large': 0.20,     // 20% - Large shrubs
+                'shrub-small': 0.30,     // 30% - Small shrubs (most common)
+                'climber': 0.20,         // 20% - Creepers and climbers
+                'groundcover': 0.20,     // 20% - Ground covers and grasses
+                'perennial': 0.20,       // 20% - Can share with groundcover
+                'grass': 0.20,           // 20% - Can share with groundcover
+                'succulent': 0.20        // 20% - Can share with groundcover
+            };
+
+            // Realistic spacing based on mature plant size (in metres)
+            // Using spacing that considers actual mature spread
+            const spacingGuide = {
+                'large-tree': 8,         // 8m apart (very large trees)
+                'small-tree': 4,         // 4m apart (small trees/large shrubs)
+                'shrub': 1.5,            // 1.5m apart (large shrubs like Callistemon)
+                'groundcover': 0.5,      // 0.5m apart (tight coverage)
+                'perennial': 0.5,        // 0.5m apart (like everlasting)
+                'grass': 0.5,            // 0.5m apart (tussocks)
+                'climber': 2,            // 2m apart (along boundaries)
+                'succulent': 0.4         // 0.4m apart (dense planting)
+            };
+
+            // Group plants by type
+            const plantsByType = {};
+            plants.forEach(plant => {
+                if (!plantsByType[plant.type]) {
+                    plantsByType[plant.type] = [];
+                }
+                plantsByType[plant.type].push(plant);
+            });
+
+            // Calculate which layers are requested
+            const requestedTypes = Object.keys(plantsByType);
+            const hasCanopy = requestedTypes.includes('large-tree') || requestedTypes.includes('small-tree');
+            const hasShrubs = requestedTypes.includes('shrub');
+            const hasGroundLayer = requestedTypes.includes('groundcover') || 
+                                  requestedTypes.includes('perennial') || 
+                                  requestedTypes.includes('grass') ||
+                                  requestedTypes.includes('succulent');
+
+            // Adjust percentages based on what's actually selected
+            // If no trees selected, redistribute that space to shrubs/groundcovers
+            let adjustedPercentages = { ...layerPercentages };
+            
+            if (!hasCanopy && hasShrubs) {
+                adjustedPercentages['shrub-large'] = 0.25;
+                adjustedPercentages['shrub-small'] = 0.35;
+            }
+            if (!hasCanopy && !hasShrubs && hasGroundLayer) {
+                adjustedPercentages['groundcover'] = 0.50;
+            }
+
+            const plantList = [];
+
+            // Process each plant type
+            Object.keys(plantsByType).forEach(type => {
+                const plantsOfType = plantsByType[type];
+                const spacing = spacingGuide[type];
+                
+                // Determine area allocation percentage
+                let areaPercentage;
+                if (type === 'large-tree') {
+                    areaPercentage = adjustedPercentages['large-tree'];
+                } else if (type === 'small-tree') {
+                    areaPercentage = adjustedPercentages['small-tree'];
+                } else if (type === 'shrub') {
+                    // Shrubs get combined large + small shrub allocation
+                    areaPercentage = adjustedPercentages['shrub-large'] + adjustedPercentages['shrub-small'];
+                } else if (type === 'climber') {
+                    areaPercentage = adjustedPercentages['climber'];
+                } else {
+                    // Groundcovers, perennials, grasses share the groundcover percentage
+                    const groundLayerTypes = requestedTypes.filter(t => 
+                        ['groundcover', 'perennial', 'grass', 'succulent'].includes(t)
+                    );
+                    areaPercentage = adjustedPercentages['groundcover'] / groundLayerTypes.length;
+                }
+
+                // Calculate area allocated to this plant type
+                const allocatedArea = area * areaPercentage;
+                
+                // Calculate how many plants fit in that area
+                const areaPerPlant = spacing * spacing;
+                let totalQuantity = Math.round(allocatedArea / areaPerPlant);
+                
+                // Apply minimum quantities
+                if (totalQuantity > 0 && totalQuantity < 3 && type !== 'large-tree') {
+                    totalQuantity = 3; // Minimum 3 plants for visual impact (except large trees)
+                }
+                
+                // Apply maximum for large trees (max 1 per 25m²)
+                if (type === 'large-tree') {
+                    const maxTrees = Math.floor(area / 25);
+                    totalQuantity = Math.min(totalQuantity, Math.max(1, maxTrees));
+                }
+                
+                // Apply maximum for small trees (max 1 per 15m²)
+                if (type === 'small-tree') {
+                    const maxTrees = Math.floor(area / 15);
+                    totalQuantity = Math.min(totalQuantity, Math.max(1, maxTrees));
+                }
+
+                if (totalQuantity > 0) {
+                    // Distribute quantity among available plants of this type
+                    const qtyPerPlant = Math.ceil(totalQuantity / plantsOfType.length);
+
+                    plantsOfType.forEach((plant, index) => {
+                        let actualQty;
+                        if (index === plantsOfType.length - 1) {
+                            // Last plant gets remaining quantity
+                            actualQty = totalQuantity;
+                        } else {
+                            actualQty = Math.min(qtyPerPlant, totalQuantity);
+                            totalQuantity -= actualQty;
+                        }
+
+                        if (actualQty > 0) {
+                            plantList.push({
+                                ...plant,
+                                quantity: actualQty,
+                                spacing: spacing
+                            });
+                        }
+                    });
+                }
+            });
+
+            return plantList;
+        }
+
+        function displayPlantListWithQuantities(plantList, sunCondition, soilType) {
+            const resultsInfo = document.getElementById('resultsInfo');
+            const totalPlants = plantList.reduce((sum, p) => sum + p.quantity, 0);
+            
+            resultsInfo.innerHTML = `
+                <strong>Garden Plan for ${gardenArea.toFixed(1)} m²</strong><br>
+                ${totalPlants} plants recommended • ${plantList.length} different species
+            `;
+            
+            plantsGrid.innerHTML = plantList.map(plant => `
+                <div class="plant-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <h3 class="plant-name" style="margin: 0;">${plant.commonName}</h3>
+                        <div style="background: linear-gradient(135deg, var(--sage-mid) 0%, var(--eucalyptus) 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; box-shadow: 0 2px 8px var(--shadow-soft);">
+                            ×${plant.quantity}
+                        </div>
+                    </div>
+                    <p class="plant-scientific">${plant.name}</p>
+                    <div class="plant-tags">
+                        ${plant.features.map(f => `<span class="tag">${f}</span>`).join('')}
+                        <span class="tag" style="background: linear-gradient(135deg, var(--eucalyptus) 0%, var(--sage-light) 100%); font-weight: 600;">
+                            ${plant.spacing}m spacing
+                        </span>
+                    </div>
+                    <p class="plant-description">${plant.description}</p>
+                    <div class="plant-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Height:</span>
+                            <span class="detail-value">${plant.height}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Spread:</span>
+                            <span class="detail-value">${plant.spread}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type:</span>
+                            <span class="detail-value">${plant.type.replace('-', ' ')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Water:</span>
+                            <span class="detail-value">${plant.waterNeeds}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Frost Tolerance:</span>
+                            <span class="detail-value">${plant.frostTolerance}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayPlantCards(plants) {
+            plantsGrid.innerHTML = plants.map(plant => `
+                <div class="plant-card">
+                    <h3 class="plant-name">${plant.commonName}</h3>
+                    <p class="plant-scientific">${plant.name}</p>
+                    <div class="plant-tags">
+                        ${plant.features.map(f => `<span class="tag">${f}</span>`).join('')}
+                    </div>
+                    <p class="plant-description">${plant.description}</p>
+                    <div class="plant-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Height:</span>
+                            <span class="detail-value">${plant.height}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Spread:</span>
+                            <span class="detail-value">${plant.spread}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type:</span>
+                            <span class="detail-value">${plant.type.replace('-', ' ')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Water:</span>
+                            <span class="detail-value">${plant.waterNeeds}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Frost Tolerance:</span>
+                            <span class="detail-value">${plant.frostTolerance}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
