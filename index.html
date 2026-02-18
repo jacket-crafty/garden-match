@@ -6,6 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GardenMatch v1.0 - Smart Plant Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Places Autocomplete API -->
+    <!-- To enable: Replace YOUR_API_KEY_HERE with your actual Google API key -->
+    <!-- Get free key from: https://console.cloud.google.com/google/maps-apis -->
+    <script>
+        // Configuration for Google Places API
+        window.GOOGLE_MAPS_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your API key
+        
+        // Load Google Places API dynamically if key is provided
+        if (window.GOOGLE_MAPS_API_KEY && window.GOOGLE_MAPS_API_KEY !== 'YOUR_API_KEY_HERE') {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&libraries=places&callback=initAutocomplete`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+    </script>
+    
     <style>
         :root {
             --forest-deep: #1a3a2e;
@@ -97,6 +115,25 @@
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes gentleSway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        header svg {
+            animation: gentleSway 4s ease-in-out infinite;
+        }
+
+        header svg:nth-child(3) {
+            animation-delay: 0.5s;
         }
 
         @keyframes fadeInDown {
@@ -542,11 +579,85 @@
 <body>
     <div class="container">
         <header>
-            <h1>
-                <span class="leaf-decoration">🌿</span>
-                GardenMatch
-                <span class="leaf-decoration">🌱</span>
-            </h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-bottom: 1rem;">
+                <!-- Left botanical illustration -->
+                <svg width="80" height="80" viewBox="0 0 80 80" style="opacity: 0.9;">
+                    <g transform="translate(40,40)">
+                        <!-- Eucalyptus branch -->
+                        <path d="M -5,-30 Q -3,-20 -2,-10 Q -1,0 0,10" 
+                              stroke="#7fa693" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <!-- Leaves -->
+                        <ellipse cx="-8" cy="-25" rx="6" ry="12" fill="#8ba888" opacity="0.8" transform="rotate(-30 -8 -25)"/>
+                        <ellipse cx="5" cy="-18" rx="6" ry="12" fill="#97a97c" opacity="0.8" transform="rotate(20 5 -18)"/>
+                        <ellipse cx="-7" cy="-10" rx="6" ry="12" fill="#8ba888" opacity="0.8" transform="rotate(-25 -7 -10)"/>
+                        <ellipse cx="6" cy="-3" rx="6" ry="12" fill="#b5c99a" opacity="0.8" transform="rotate(25 6 -3)"/>
+                        <ellipse cx="-5" cy="5" rx="6" ry="12" fill="#7fa693" opacity="0.8" transform="rotate(-20 -5 5)"/>
+                    </g>
+                </svg>
+
+                <!-- Logo circle with leaf -->
+                <div style="position: relative;">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <!-- Outer circle -->
+                        <circle cx="50" cy="50" r="48" fill="none" stroke="url(#gradient1)" stroke-width="3"/>
+                        
+                        <!-- Inner decorative circle -->
+                        <circle cx="50" cy="50" r="40" fill="url(#gradient2)" opacity="0.15"/>
+                        
+                        <!-- Central leaf icon -->
+                        <g transform="translate(50,50)">
+                            <path d="M 0,-20 Q -10,-10 -12,0 Q -10,10 0,20 Q 10,10 12,0 Q 10,-10 0,-20 Z" 
+                                  fill="url(#gradient3)" stroke="#4a6b5e" stroke-width="1.5"/>
+                            <path d="M 0,-20 Q 0,-5 0,20" stroke="#4a6b5e" stroke-width="1.5" opacity="0.6"/>
+                            <path d="M 0,-10 Q -8,-5 -10,0" stroke="#4a6b5e" stroke-width="1" opacity="0.4" fill="none"/>
+                            <path d="M 0,-5 Q 8,-2 10,0" stroke="#4a6b5e" stroke-width="1" opacity="0.4" fill="none"/>
+                            <path d="M 0,2 Q -7,5 -9,8" stroke="#4a6b5e" stroke-width="1" opacity="0.4" fill="none"/>
+                            <path d="M 0,7 Q 7,10 9,13" stroke="#4a6b5e" stroke-width="1" opacity="0.4" fill="none"/>
+                        </g>
+                        
+                        <!-- Gradients -->
+                        <defs>
+                            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7fa693;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4a6b5e;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#b5c99a;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8ba888;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#b5c99a;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#8ba888;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#7fa693;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- Right botanical illustration -->
+                <svg width="80" height="80" viewBox="0 0 80 80" style="opacity: 0.9;">
+                    <g transform="translate(40,40)">
+                        <!-- Grass stems -->
+                        <path d="M -10,-30 Q -8,-15 -7,0 Q -6,10 -5,15" 
+                              stroke="#97a97c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                        <path d="M -3,-30 Q -2,-15 -1,0 Q 0,10 1,15" 
+                              stroke="#8ba888" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                        <path d="M 4,-30 Q 5,-15 6,0 Q 7,10 8,15" 
+                              stroke="#b5c99a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                        
+                        <!-- Seed heads -->
+                        <ellipse cx="-7" cy="-32" rx="2" ry="4" fill="#7fa693" opacity="0.7"/>
+                        <ellipse cx="-1" cy="-32" rx="2" ry="4" fill="#8ba888" opacity="0.7"/>
+                        <ellipse cx="6" cy="-32" rx="2" ry="4" fill="#97a97c" opacity="0.7"/>
+                        
+                        <!-- Small leaves -->
+                        <ellipse cx="-10" cy="-20" rx="3" ry="8" fill="#8ba888" opacity="0.6" transform="rotate(-45 -10 -20)"/>
+                        <ellipse cx="8" cy="-18" rx="3" ry="8" fill="#b5c99a" opacity="0.6" transform="rotate(40 8 -18)"/>
+                    </g>
+                </svg>
+            </div>
+
+            <h1>GardenMatch</h1>
             <p class="subtitle">Find the perfect plants for your garden's unique conditions</p>
             <div style="margin-top: 0.5rem;">
                 <span style="display: inline-block; background: linear-gradient(135deg, var(--sage-mid) 0%, var(--eucalyptus) 100%); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 8px var(--shadow-soft);">
@@ -557,10 +668,11 @@
 
         <div class="form-card">
             <div class="info-box">
-                <strong>🔬 How it works:</strong> Enter your address and the app will automatically detect your climate zone and soil type. 
-                Location detection works offline using Australian suburb patterns, and can be enhanced with live APIs when deployed online.
-                Plant recommendations are based on <a href="https://www.inaturalist.org/" target="_blank" style="color: var(--earth-dark); text-decoration: underline;">iNaturalist</a>,
-                <a href="https://www.ala.org.au/" target="_blank" style="color: var(--earth-dark); text-decoration: underline;">Atlas of Living Australia</a>, and Australian botanical databases.
+                <strong>🌿 Live Plant Data:</strong> This app now searches <strong>iNaturalist</strong> in real-time to find Australian native plants 
+                verified growing in Victoria! You'll see actual photos, observation counts, and research-grade species.
+                <br><br>
+                <strong>💡 Best Experience:</strong> Deploy online (free with GitHub Pages) to access thousands of plants with photos. 
+                Works offline with local database as fallback (40 plants).
             </div>
             
             <form id="gardenForm">
@@ -887,6 +999,96 @@
 
         let autoDetectedData = null;
         let gardenArea = 0;
+        let placesAutocomplete = null;
+
+        // Initialize Google Places Autocomplete (called when API loads)
+        window.initAutocomplete = function() {
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                try {
+                    // Initialize autocomplete for Australia only
+                    placesAutocomplete = new google.maps.places.Autocomplete(addressInput, {
+                        componentRestrictions: { country: 'au' },
+                        fields: ['formatted_address', 'geometry', 'address_components', 'name'],
+                        types: ['address']
+                    });
+
+                    // Listen for place selection
+                    placesAutocomplete.addListener('place_changed', function() {
+                        const place = placesAutocomplete.getPlace();
+                        
+                        if (place.geometry) {
+                            // Extract location data from Google Places
+                            const lat = place.geometry.location.lat();
+                            const lng = place.geometry.location.lng();
+                            
+                            // Extract suburb and state from address components
+                            let suburb = '';
+                            let state = '';
+                            
+                            if (place.address_components) {
+                                place.address_components.forEach(component => {
+                                    if (component.types.includes('locality')) {
+                                        suburb = component.long_name;
+                                    }
+                                    if (component.types.includes('administrative_area_level_1')) {
+                                        state = component.short_name;
+                                    }
+                                });
+                            }
+                            
+                            // Determine climate zone and soil type
+                            const displayName = `${suburb}, ${state}`;
+                            const climateZone = determineClimateZone(lat, lng, displayName.toLowerCase());
+                            const soilData = estimateSoilFromCoordinates(lat, lng);
+                            
+                            autoDetectedData = {
+                                climateZone: climateZone,
+                                region: displayName,
+                                soilType: soilData.soilType,
+                                latitude: lat,
+                                longitude: lng
+                            };
+                            
+                            // Update UI
+                            detectedInfo.textContent = `Climate Zone ${autoDetectedData.climateZone}, ${autoDetectedData.region}`;
+                            locationInfo.style.display = 'block';
+                            locationInfo.style.animation = 'fadeInUp 0.5s ease-out';
+                            
+                            detectedSoil.textContent = autoDetectedData.soilType;
+                            soilAutoDetected.style.display = 'block';
+                            soilAutoDetected.style.animation = 'fadeInUp 0.5s ease-out';
+                            soilManualInput.style.display = 'none';
+                        }
+                    });
+                    
+                    console.log('✅ Google Places Autocomplete enabled');
+                } catch (error) {
+                    console.log('Google Places setup error, using fallback:', error);
+                }
+            }
+        };
+
+        // Fallback: Manual address detection on blur (if autocomplete not available)
+        addressInput.addEventListener('blur', async function() {
+            // Only trigger if autocomplete didn't already handle it
+            if (autoDetectedData && autoDetectedData.latitude) return;
+            
+            const address = this.value.trim();
+            if (address.length < 5) return;
+
+            console.log('Using fallback location detection (offline mode)');
+            // Fallback to pattern matching - works offline
+            autoDetectedData = detectLocationData(address);
+            
+            if (autoDetectedData) {
+                detectedInfo.textContent = `Climate Zone ${autoDetectedData.climateZone}, ${autoDetectedData.region}`;
+                locationInfo.style.display = 'block';
+                
+                detectedSoil.textContent = autoDetectedData.soilType;
+                soilAutoDetected.style.display = 'block';
+                soilManualInput.style.display = 'none';
+            }
+        });
 
         // Toggle planner section
         enablePlanner.addEventListener('change', function() {
@@ -1311,76 +1513,301 @@
         });
 
         async function getPlantRecommendations(criteria) {
-            // PRODUCTION INTEGRATION NOTES:
-            // 
-            // 1. iNaturalist API (FREE, NO AUTH REQUIRED)
-            //    - Get plant photos and real distribution data
-            //    - See where plants actually grow in Victoria
-            //    - API: https://api.inaturalist.org/v1/
-            //
-            // 2. ANGUS STEWART'S PLANT DATABASE (gardeningwithangus.com.au)
-            //    - Could be accessed via web scraping or by contacting team for API access
-            //
-            // 3. VICTORIAN SOIL DATA API
-            //    - Agriculture Victoria Soils API
-            //
-            // 4. DIGITAL TWIN VICTORIA
-            //    - WMS/WFS services for soil type mapping
+            // INATURALIST INTEGRATION - LIVE PLANT DATA
+            // This fetches real Australian native plants from iNaturalist with photos!
             
-            // Simulated delay to mimic API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Get plants from our database
-            let plantDatabase = getPlantsForCriteria(criteria);
-            
-            // Enhance with iNaturalist data (in production)
-            // plantDatabase = await enrichWithiNaturalistData(plantDatabase, criteria);
-            
-            return plantDatabase;
+            try {
+                console.log('Searching iNaturalist for plants matching your criteria...');
+                
+                // Search iNaturalist for Australian plants in Victoria
+                const plants = await searchPlantsFromiNaturalist(criteria);
+                
+                if (plants && plants.length > 0) {
+                    return plants;
+                } else {
+                    // Fallback to local database if API fails
+                    console.log('Using local plant database as fallback');
+                    return getPlantsForCriteria(criteria);
+                }
+            } catch (error) {
+                console.error('Error fetching from iNaturalist:', error);
+                // Fallback to local database
+                return getPlantsForCriteria(criteria);
+            }
         }
 
-        // Function to enrich plant data with iNaturalist observations
-        async function enrichWithiNaturalistData(plants, criteria) {
-            // This would be called in production to add:
-            // - Real photos from Victoria
-            // - Observation counts
-            // - Actual distribution data
-            // - Phenology (flowering times)
+        async function searchPlantsFromiNaturalist(criteria) {
+            const plants = [];
             
-            const enrichedPlants = [];
-            
-            for (const plant of plants) {
+            // Map our plant types to iNaturalist search terms - EXPANDED
+            const iNatQueries = {
+                'large-tree': ['Eucalyptus', 'Corymbia', 'Angophora', 'Ficus'],
+                'small-tree': ['Acacia', 'Melaleuca', 'Banksia', 'Allocasuarina', 'Leptospermum'],
+                'shrub': ['Grevillea', 'Callistemon', 'Westringia', 'Correa', 'Hakea', 'Prostanthera', 'Crowea', 'Eremophila'],
+                'groundcover': ['Myoporum', 'Dichondra', 'Viola', 'Carpobrotus', 'Grevillea', 'Scaevola'],
+                'perennial': ['Anigozanthos', 'Dianella', 'Chrysocephalum', 'Wahlenbergia', 'Brachyscome', 'Bulbine'],
+                'grass': ['Lomandra', 'Poa', 'Themeda', 'Microlaena', 'Austrostipa', 'Dianella'],
+                'climber': ['Pandorea', 'Hardenbergia', 'Kennedia', 'Clematis'],
+                'succulent': ['Carpobrotus', 'Disphyma']
+            };
+
+            // Get search terms for selected plant types
+            const searchTerms = [];
+            criteria.plantTypes.forEach(type => {
+                if (iNatQueries[type]) {
+                    searchTerms.push(...iNatQueries[type]);
+                }
+            });
+
+            // Remove duplicates
+            const uniqueSearchTerms = [...new Set(searchTerms)];
+
+            console.log(`Searching for ${uniqueSearchTerms.length} plant genera...`);
+
+            // Search iNaturalist for each genus - FIXED to avoid 422 errors
+            for (const searchTerm of uniqueSearchTerms.slice(0, 15)) {
                 try {
-                    // Search for taxon in iNaturalist
-                    const taxonResponse = await fetch(
-                        `https://api.inaturalist.org/v1/taxa/autocomplete?q=${encodeURIComponent(plant.name)}&rank=species`
+                    // Search for taxa - Don't use place_id in autocomplete (causes 422)
+                    const taxaResponse = await fetch(
+                        `https://api.inaturalist.org/v1/taxa/autocomplete?q=${encodeURIComponent(searchTerm)}&per_page=5`
                     );
-                    const taxonData = await taxonResponse.json();
                     
-                    if (taxonData.results && taxonData.results.length > 0) {
-                        const taxon = taxonData.results[0];
-                        
-                        // Get observations in Victoria
-                        const obsResponse = await fetch(
-                            `https://api.inaturalist.org/v1/observations?taxon_id=${taxon.id}&place_id=7771&per_page=10&order=desc&order_by=created_at`
-                        );
-                        const obsData = await obsResponse.json();
-                        
-                        plant.iNaturalistData = {
-                            taxonId: taxon.id,
-                            photo: taxon.default_photo?.medium_url,
-                            observationCount: obsData.total_results,
-                            recentObservations: obsData.results
-                        };
+                    if (!taxaResponse.ok) {
+                        console.warn(`Search failed for ${searchTerm}: ${taxaResponse.status}`);
+                        continue;
+                    }
+                    
+                    const taxaData = await taxaResponse.json();
+                    
+                    if (taxaData.results && taxaData.results.length > 0) {
+                        for (const taxon of taxaData.results) {
+                            // Only include species-level results
+                            if (taxon.rank !== 'species') continue;
+                            
+                            // Filter to Victoria by checking observations
+                            const obsResponse = await fetch(
+                                `https://api.inaturalist.org/v1/observations?taxon_id=${taxon.id}&place_id=7771&per_page=1&quality_grade=research`
+                            );
+                            
+                            if (!obsResponse.ok) {
+                                console.warn(`Observation check failed for taxon ${taxon.id}`);
+                                continue;
+                            }
+                            
+                            const obsData = await obsResponse.json();
+                            
+                            // Only include if it has research-grade observations in Victoria
+                            if (obsData.total_results > 0) {
+                                const plant = convertiNaturalistToPlant(taxon, obsData.total_results, criteria);
+                                if (plant) {
+                                    plants.push(plant);
+                                    console.log(`Added: ${plant.commonName}`);
+                                }
+                            }
+                        }
                     }
                 } catch (error) {
-                    console.error(`Error fetching iNaturalist data for ${plant.name}:`, error);
+                    console.error(`Error searching for ${searchTerm}:`, error);
+                    continue;
                 }
+            }
+
+            console.log(`Found ${plants.length} plants from iNaturalist`);
+
+            // Deduplicate by scientific name
+            const uniquePlants = [];
+            const seenNames = new Set();
+            plants.forEach(plant => {
+                if (!seenNames.has(plant.name)) {
+                    seenNames.add(plant.name);
+                    uniquePlants.push(plant);
+                }
+            });
+
+            // If we got very few results, supplement with local database
+            if (uniquePlants.length < 5) {
+                console.log('Supplementing with local database...');
+                const localPlants = getPlantsForCriteria(criteria);
                 
-                enrichedPlants.push(plant);
+                // Add local plants that aren't already in the list
+                localPlants.forEach(localPlant => {
+                    if (!seenNames.has(localPlant.name)) {
+                        uniquePlants.push(localPlant);
+                    }
+                });
+            }
+
+            return uniquePlants;
+        }
+
+        function convertiNaturalistToPlant(taxon, observationCount, criteria) {
+            // Convert iNaturalist taxon data to our plant format
+            const scientificName = taxon.name;
+            const commonName = taxon.preferred_common_name || taxon.english_common_name || scientificName;
+            
+            // Infer plant type from taxon name and rank
+            let plantType = inferPlantType(taxon, criteria.plantTypes);
+            if (!plantType || !criteria.plantTypes.includes(plantType)) {
+                return null; // Skip if we can't match to requested types
+            }
+
+            // Get photo - check multiple photo fields
+            let photoUrl = null;
+            if (taxon.default_photo) {
+                photoUrl = taxon.default_photo.medium_url || taxon.default_photo.square_url || taxon.default_photo.small_url;
             }
             
-            return enrichedPlants;
+            // Debug logging
+            if (photoUrl) {
+                console.log(`✅ Photo found for ${commonName}: ${photoUrl}`);
+            } else {
+                console.log(`⚠️ No photo for ${commonName}`);
+            }
+
+            // Infer characteristics (simplified for now)
+            const characteristics = inferCharacteristics(taxon, observationCount);
+
+            return {
+                name: scientificName,
+                commonName: commonName,
+                type: plantType,
+                sun: characteristics.sun,
+                soil: ["sandy", "loam", "clay"], // Broad compatibility
+                climateZones: ["3", "4", "5"], // Victoria zones
+                description: `${commonName} - observed ${observationCount} times in Victoria. ${taxon.wikipedia_summary ? taxon.wikipedia_summary.substring(0, 150) + '...' : 'Australian native plant suitable for Victorian gardens.'}`,
+                height: characteristics.height,
+                spread: characteristics.spread,
+                features: characteristics.features,
+                waterNeeds: characteristics.waterNeeds,
+                frostTolerance: characteristics.frostTolerance,
+                photoUrl: photoUrl,
+                iNaturalistId: taxon.id,
+                observationCount: observationCount
+            };
+        }
+
+        function inferPlantType(taxon, requestedTypes) {
+            const name = taxon.name.toLowerCase();
+            const commonName = (taxon.preferred_common_name || '').toLowerCase();
+            const rank = taxon.rank || '';
+            
+            // Check each requested type to see if this plant matches
+            for (const reqType of requestedTypes) {
+                if (reqType === 'large-tree') {
+                    if (name.includes('eucalyptus') || name.includes('corymbia') || 
+                        name.includes('angophora') || name.includes('ficus')) {
+                        return 'large-tree';
+                    }
+                }
+                
+                if (reqType === 'small-tree') {
+                    if (name.includes('acacia') || name.includes('melaleuca') || 
+                        name.includes('banksia') || name.includes('allocasuarina') ||
+                        commonName.includes('wattle') || commonName.includes('tea tree')) {
+                        return 'small-tree';
+                    }
+                }
+                
+                if (reqType === 'shrub') {
+                    if (name.includes('grevillea') || name.includes('callistemon') || 
+                        name.includes('westringia') || name.includes('correa') || 
+                        name.includes('leptospermum') || name.includes('hakea') ||
+                        name.includes('prostanthera') || name.includes('crowea') ||
+                        name.includes('eremophila') || commonName.includes('shrub') ||
+                        commonName.includes('bush') || commonName.includes('bottlebrush')) {
+                        return 'shrub';
+                    }
+                }
+                
+                if (reqType === 'groundcover') {
+                    if (name.includes('myoporum') || name.includes('dichondra') || 
+                        name.includes('viola') || name.includes('carpobrotus') ||
+                        name.includes('scaevola') || commonName.includes('groundcover') ||
+                        commonName.includes('ground cover') || commonName.includes('mat')) {
+                        return 'groundcover';
+                    }
+                }
+                
+                if (reqType === 'grass') {
+                    if (name.includes('lomandra') || name.includes('poa') || 
+                        name.includes('themeda') || name.includes('microlaena') || 
+                        name.includes('austrostipa') || commonName.includes('grass') ||
+                        commonName.includes('sedge') || commonName.includes('rush')) {
+                        return 'grass';
+                    }
+                }
+                
+                if (reqType === 'climber') {
+                    if (name.includes('pandorea') || name.includes('hardenbergia') || 
+                        name.includes('kennedia') || name.includes('clematis') ||
+                        commonName.includes('vine') || commonName.includes('climber')) {
+                        return 'climber';
+                    }
+                }
+                
+                if (reqType === 'perennial') {
+                    if (name.includes('anigozanthos') || name.includes('dianella') || 
+                        name.includes('chrysocephalum') || name.includes('wahlenbergia') ||
+                        name.includes('brachyscome') || name.includes('bulbine') ||
+                        commonName.includes('lily') || commonName.includes('daisy') ||
+                        commonName.includes('everlasting')) {
+                        return 'perennial';
+                    }
+                }
+                
+                if (reqType === 'succulent') {
+                    if (name.includes('carpobrotus') || name.includes('disphyma') ||
+                        commonName.includes('pigface') || commonName.includes('succulent')) {
+                        return 'succulent';
+                    }
+                }
+            }
+            
+            // If no specific match, return the first requested type for genus-level matches
+            if (rank === 'genus' && requestedTypes.length > 0) {
+                return requestedTypes[0];
+            }
+            
+            return null;
+        }
+
+        function inferCharacteristics(taxon, observationCount) {
+            // Simplified inference based on taxon name and type
+            const name = taxon.name.toLowerCase();
+            
+            let characteristics = {
+                sun: ["full-sun", "partial-sun"],
+                height: "1-3m",
+                spread: "1-2m",
+                features: ["Native"],
+                waterNeeds: "Low to Medium",
+                frostTolerance: "Moderate"
+            };
+
+            // Adjust based on genus
+            if (name.includes('eucalyptus') || name.includes('corymbia')) {
+                characteristics.height = "15-30m";
+                characteristics.spread = "8-15m";
+                characteristics.features.push("Bird attracting", "Drought tolerant");
+                characteristics.sun = ["full-sun"];
+            } else if (name.includes('acacia')) {
+                characteristics.height = "3-8m";
+                characteristics.spread = "3-5m";
+                characteristics.features.push("Fast growing", "Flowering");
+            } else if (name.includes('grevillea')) {
+                characteristics.features.push("Bird attracting", "Flowering");
+                characteristics.waterNeeds = "Low";
+            } else if (name.includes('callistemon')) {
+                characteristics.features.push("Bird attracting", "Flowering");
+                characteristics.waterNeeds = "Low to Medium";
+            }
+
+            // Popular plants get special badge
+            if (observationCount > 100) {
+                characteristics.features.push(`Popular (${observationCount} observations)`);
+            }
+
+            return characteristics;
         }
 
         function getPlantsForCriteria(criteria) {
@@ -2143,6 +2570,13 @@
             
             plantsGrid.innerHTML = plantList.map(plant => `
                 <div class="plant-card">
+                    ${plant.photoUrl ? `
+                        <div style="margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 18px 18px 0 0; overflow: hidden; height: 200px;">
+                            <img src="${plant.photoUrl}" alt="${plant.commonName}" 
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 onerror="this.parentElement.style.display='none'">
+                        </div>
+                    ` : ''}
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                         <h3 class="plant-name" style="margin: 0;">${plant.commonName}</h3>
                         <div style="background: linear-gradient(135deg, var(--sage-mid) 0%, var(--eucalyptus) 100%); color: white; padding: 0.5rem 1rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; box-shadow: 0 2px 8px var(--shadow-soft);">
@@ -2178,14 +2612,44 @@
                             <span class="detail-label">Frost Tolerance:</span>
                             <span class="detail-value">${plant.frostTolerance}</span>
                         </div>
+                        ${plant.iNaturalistId ? `
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--mint-whisper);">
+                            <a href="https://www.inaturalist.org/taxa/${plant.iNaturalistId}" target="_blank" 
+                               style="color: var(--sage-mid); font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                                <span>🔍</span> View on iNaturalist
+                            </a>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
         }
 
         function displayPlantCards(plants) {
-            plantsGrid.innerHTML = plants.map(plant => `
+            plantsGrid.innerHTML = plants.map(plant => {
+                // Check if we have a valid photo URL
+                const hasPhoto = plant.photoUrl && plant.photoUrl.length > 0;
+                
+                return `
                 <div class="plant-card">
+                    ${hasPhoto ? `
+                        <div style="margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 18px 18px 0 0; overflow: hidden; height: 200px; background: linear-gradient(135deg, var(--mint-whisper) 0%, var(--sage-light) 100%);">
+                            <img src="${plant.photoUrl}" 
+                                 alt="${plant.commonName}" 
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 loading="lazy"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:200px;color:var(--sage-mid);font-size:3rem;\\'>🌿</div>';">
+                        </div>
+                    ` : `
+                        <div style="margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 18px 18px 0 0; overflow: hidden; height: 200px; background: linear-gradient(135deg, var(--mint-whisper) 0%, var(--sage-light) 100%); display: flex; align-items: center; justify-content: center;">
+                            <svg width="80" height="80" viewBox="0 0 80 80" style="opacity: 0.5;">
+                                <circle cx="40" cy="40" r="35" fill="none" stroke="var(--sage-mid)" stroke-width="2"/>
+                                <path d="M 40,15 Q 30,25 28,35 Q 27,42 40,55 Q 53,42 52,35 Q 50,25 40,15 Z" 
+                                      fill="var(--sage-mid)" opacity="0.6"/>
+                                <path d="M 40,15 L 40,55" stroke="var(--forest-deep)" stroke-width="2"/>
+                            </svg>
+                        </div>
+                    `}
                     <h3 class="plant-name">${plant.commonName}</h3>
                     <p class="plant-scientific">${plant.name}</p>
                     <div class="plant-tags">
@@ -2213,9 +2677,17 @@
                             <span class="detail-label">Frost Tolerance:</span>
                             <span class="detail-value">${plant.frostTolerance}</span>
                         </div>
+                        ${plant.iNaturalistId ? `
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--mint-whisper);">
+                            <a href="https://www.inaturalist.org/taxa/${plant.iNaturalistId}" target="_blank" 
+                               style="color: var(--sage-mid); font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                                <span>🔍</span> View ${hasPhoto ? 'more photos' : 'photos'} on iNaturalist
+                            </a>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
     </script>
 </body>
